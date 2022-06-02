@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM alpine:3.12
-RUN apk add --no-cache lvm2 lvm2-extra util-linux device-mapper
-RUN apk add --no-cache btrfs-progs xfsprogs xfsprogs-extra e2fsprogs e2fsprogs-extra
-RUN apk add --no-cache ca-certificates libc6-compat
+FROM ubuntu:20.04
+RUN apt-get update
+RUN apt-get -y install xfsprogs e2fsprogs
+RUN apt-get -y install ca-certificates
+RUN apt-get -y install vim
 
 ARG DBUILD_DATE
 ARG DBUILD_REPO_URL

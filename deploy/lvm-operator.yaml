@@ -1338,6 +1338,74 @@ roleRef:
 
 ---
 
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: openebs-lvmpv-bin
+  namespace: kube-system # should be the same namespace where it is getting mounted
+data:
+  get_bin_path: |
+    #!/bin/sh
+    bin_name=$1
+    if [ -x /host/bin/which ]; then
+      echo $(chroot /host /bin/which $bin_name | cut -d ' ' -f 1)
+    elif [ -x /host/usr/bin/which ]; then
+      echo $(chroot /host /usr/bin/which $bin_name | cut -d ' ' -f 1)
+    else
+      $(chroot /host which $bin_name | cut -d ' ' -f 1)
+    fi
+
+  vgcreate: |
+    #!/bin/sh
+    path=$(/sbin/lvm-eg/get_bin_path "vgcreate")
+    chroot /host $path "$@"
+
+  vgchange: |
+    #!/bin/sh
+    path=$(/sbin/lvm-eg/get_bin_path "vgchange")
+    chroot /host $path "$@"
+
+  vgs: |
+    #!/bin/sh
+    path=$(/sbin/lvm-eg/get_bin_path "vgs")
+    chroot /host $path "$@"
+
+  lvcreate: |
+    #!/bin/sh
+    path=$(/sbin/lvm-eg/get_bin_path "lvcreate")
+    chroot /host $path "$@"
+
+  lvchange: |
+    #!/bin/sh
+    path=$(/sbin/lvm-eg/get_bin_path "lvchange")
+    chroot /host $path "$@"
+
+  lvextend: |
+    #!/bin/sh
+    path=$(/sbin/lvm-eg/get_bin_path "lvextend")
+    chroot /host $path "$@"
+
+  lvremove: |
+    #!/bin/sh
+    path=$(/sbin/lvm-eg/get_bin_path "lvremove")
+    chroot /host $path "$@"
+
+  lvs: |
+    #!/bin/sh
+    path=$(/sbin/lvm-eg/get_bin_path "lvs")
+    chroot /host $path "$@"
+
+  pvs: |
+    #!/bin/sh
+    path=$(/sbin/lvm-eg/get_bin_path "pvs")
+    chroot /host $path "$@"
+
+  pvscan: |
+    #!/bin/sh
+    path=$(/sbin/lvm-eg/get_bin_path "pvscan")
+    chroot /host $path "$@"
+
+---
 apiVersion: scheduling.k8s.io/v1
 kind: PriorityClass
 metadata:
@@ -1436,6 +1504,10 @@ spec:
               mountPath: /plugin
             - name: device-dir
               mountPath: /dev
+            - name: chroot-lvm
+              mountPath: /sbin/lvm-eg
+            - name: host-root
+              mountPath: /host
             - name: pods-mount-dir
               mountPath: /var/lib/kubelet/
               # needed so that any mounts setup inside this container are
@@ -1445,6 +1517,14 @@ spec:
         - name: device-dir
           hostPath:
             path: /dev
+            type: Directory
+        - name: chroot-lvm
+          configMap:
+            defaultMode: 0555
+            name: openebs-lvmpv-bin
+        - name: host-root
+          hostPath:
+            path: /
             type: Directory
         - name: registration-dir
           hostPath:

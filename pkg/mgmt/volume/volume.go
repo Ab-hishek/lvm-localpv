@@ -165,8 +165,10 @@ func (c *VolController) getVgPriorityList(vol *apis.LVMVolume) ([]apis.VolumeGro
 	if err != nil {
 		return nil, fmt.Errorf("failed to list vgs available on node: %v", err)
 	}
+	fmt.Printf("list of vgs = %v", vgs)
 	filteredVgs := make([]apis.VolumeGroup, 0)
 	for _, vg := range vgs {
+		fmt.Printf("vol= %v, object = %v", vol.Name, vol)
 		if !re.MatchString(vg.Name) {
 			continue
 		}
@@ -177,19 +179,25 @@ func (c *VolController) getVgPriorityList(vol *apis.LVMVolume) ([]apis.VolumeGro
 				continue
 			}
 		}
-		// skip th vg if the volume is to be created in exclusive shared mode but the underlying
+		fmt.Printf("sharedmode = %v, attribute = %s, attribute[0] = %v, attribute[5] = %v, filteredvgs = %v", vol.Spec.SharedMode, vg.Attribute, vg.Attribute[0], vg.Attribute[5], filteredVgs)
+		// skip the vg if the volume is to be created in exclusive shared mode but the underlying
 		// vg is not shared. Shared  VGs  are indicated by "s" (for shared) in the sixth attr
 		// field
 		if vol.Spec.SharedMode == apis.LVMExclusiveSharedMode && vg.Attribute[5] != 's' {
+			fmt.Printf("vg = %s is a shared vg", vg.Name)
 			continue
 		}
 		filteredVgs = append(filteredVgs, vg)
 	}
 
+	fmt.Println("filtered vgs= ", filteredVgs)
+
 	// prioritize the volume group having less free space available.
 	sort.SliceStable(filteredVgs, func(i, j int) bool {
 		return filteredVgs[i].Free.Cmp(filteredVgs[j].Free) < 0
 	})
+
+	fmt.Println("sorted filtered vgs= ", filteredVgs)
 	return filteredVgs, nil
 }
 

@@ -46,18 +46,18 @@ const (
 
 // lvm command related constants
 const (
-	VGCreate = "vgcreate"
-	VGList   = "vgs"
-	VGChange = "vgchange"
+	VGCreate = "/sbin/lvm-eg/vgcreate"
+	VGList   = "/sbin/lvm-eg/vgs"
+	VGChange = "/sbin/lvm-eg/vgchange"
 
-	LVCreate = "lvcreate"
-	LVRemove = "lvremove"
-	LVExtend = "lvextend"
-	LVList   = "lvs"
-	LVChange = "lvchange"
+	LVCreate = "/sbin/lvm-eg/lvcreate"
+	LVRemove = "/sbin/lvm-eg/lvremove"
+	LVExtend = "/sbin/lvm-eg/lvextend"
+	LVList   = "/sbin/lvm-eg/lvs"
+	LVChange = "/sbin/lvm-eg/lvchange"
 
-	PVList = "pvs"
-	PVScan = "pvscan"
+	PVList = "/sbin/lvm-eg/pvs"
+	PVScan = "/sbin/lvm-eg/pvscan"
 
 	YES        = "yes"
 	LVThinPool = "thin-pool"
